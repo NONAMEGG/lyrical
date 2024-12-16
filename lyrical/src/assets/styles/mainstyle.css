@@ -1,0 +1,139 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap");
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+input::placeholder {
+  text-align: center;
+  color: rgb(194, 194, 194);
+}
+
+input:focus {
+  text-align: center;
+  border: 1px solid;
+  border-radius: 12px;
+  border-color: rgb(36, 36, 36);
+  outline: none;
+}
+
+.default_button {
+  cursor: pointer;
+  background: inherit;
+  border: 1px solid #2e2d2d;
+  padding: 5px 15px 5px 15px;
+  transition: 0.3s ease-in-out;
+  border-radius: 10px;
+}
+
+.default_button:hover {
+  background: #fff;
+  color: #000;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.link {
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.menu {
+  padding: 5px 5px 5px 5px;
+  color: #fff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #219c96;
+}
+
+.logo {
+  font-size: 24px;
+  cursor: pointer;
+  font-family: "Dancing Script", cursive;
+  font-optical-sizing: auto;
+  font-weight: 700;
+}
+
+.search_container {
+  position: relative;
+}
+
+.search_bar {
+  display: flex;
+  gap: 5px;
+}
+
+.search_results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 50vh;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.logout_button {
+  color: #fff;
+}
+
+.logout_button_container {
+  text-align: center;
+  margin-left: 10px;
+  display: inline-block;
+  width: 100px;
+}
+
+.search_input {
+  background: none;
+  border: 1px solid #161616;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 10px;
+  transition: 0.5s;
+  text-align: center;
+}
+
+.search_song_link {
+  color: #000;
+}
+
+.search_result_element {
+  border-bottom: 1px solid #000;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.search_result_element:hover {
+  margin-left: 5px;
+}
+
+.artist {
+  color: #424242;
+}
+
+.main_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.left_right_container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.bottom_container {
+  text-align: center;
+}
