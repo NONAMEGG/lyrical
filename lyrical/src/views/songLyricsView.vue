@@ -117,7 +117,7 @@ export default {
                 console.log(data);
                 console.log(song.value.artist);
                 artistId.value = data.find(artist => artist.name === song.value.artist).id;
-                console.log(artistId.value.id);
+                console.log(artistId.value);
             } catch (error) {
                 console.log(error);
             }
@@ -209,25 +209,27 @@ export default {
 
                 // Calculate start and end indices
                 let lyricsText = song.value.lyrics.replace(/<br\s*\/?>/gi, '');
-                console.log(lyricsText.length);
+                console.log(song.value.lyrics);
                 const indexMapping = createIndexMapping(song.value.lyrics);
 
-                const normalizeLineEndings = (text) => text.replace(/\r\n|\r|\n/g, '');
+                const normalizeLineEndings = (text) => text.replace(/\r\n|\r|\n/g, ' ');
                 lyricsText = normalizeLineEndings(lyricsText);
                 selectedTextValue = normalizeLineEndings(selectedTextValue);
-
-                console.log(selectedTextValue.length);
+                console.log(lyricsText);
                 const startIdx = lyricsText.indexOf(selectedTextValue);
+                
                 const endIdx = startIdx + selectedTextValue.length - 1;
+                console.log(startIdx, endIdx);
                 const startIdxWithBr = indexMapping[startIdx];
                 const endIdxWithBr = indexMapping[endIdx];
+                console.log(startIdx, endIdx);
                 for (let i = 0; i < selectedTextValue.length - 1; i++) {
                     if (selectedTextValue[i] != lyricsText[i]) {
-                        console.log(i, selectedTextValue[i], lyricsText[i]);
+                        // console.log(i, selectedTextValue[i], lyricsText[i]);
                     }
                 }
-                console.log(lyricsText);
-                console.log(startIdx);
+                // console.log(lyricsText);
+                // console.log(startIdx);
                 // Check for any overlap with existing explanations
                 const hasOverlap = explanations.value.some(
                     (ex) => !(endIdxWithBr < ex.idx_start || startIdxWithBr > ex.idx_end)
@@ -330,7 +332,9 @@ export default {
 
         const addComment = async () => {
             try {
-                if (newComment.value = '') {
+                console.log(newComment.value);
+                if (newComment.value != '') {
+                    console.log('fhjdsf');
                     const data = await addUsersComment(song.value.id, user.value.id, newComment.value);
                     newComment.value = '';
                     await fetchComments();

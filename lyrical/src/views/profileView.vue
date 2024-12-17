@@ -154,7 +154,7 @@
       selectedArtist.value = artistId;
     }
     console.log(lyricsText.value);
-    const songId = await addSong(songName.value, lyricsText.value.replace(/\n/g, '<br>\n'), description.value, selectedArtist.value, user.value.id);
+    const songId = await addSong(songName.value, lyricsText.value.replace(/\n/g, '<br>\n').replace(/\s\s+/g, ''), description.value, selectedArtist.value, user.value.id);
     await fetchUsersSongs();
   } catch (error) {
     console.error('Ошибка загрузки изображения:', error);  
