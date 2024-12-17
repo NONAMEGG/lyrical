@@ -334,6 +334,7 @@ export async function fetchCommentsForExplanation(explId) {
 
 export async function likeDislikeSong(songId, userId) {
   try {
+    console.log(songId, userId);
     const { data, error } = await supabase.rpc("add_rating_to_song", {
       p_song_id: songId,
       p_user_id: userId,
@@ -342,7 +343,7 @@ export async function likeDislikeSong(songId, userId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
+    console.log(`my data ${data}`);
     return data;
   } catch (error) {
     throw new Error(error.message);

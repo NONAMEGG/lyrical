@@ -1,4 +1,5 @@
 <template>
+  <body>
   <Header></Header>
   <div class="main_container">
     <div class="left_right_container">
@@ -44,6 +45,7 @@
         </div>
     </div>
   </div>
+</body>
 </template>
   
   <script>
@@ -135,4 +137,10 @@
   
 <style>
 @import '../assets/styles/mainstyle.css';
+.main_container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  
+}
 </style>

@@ -1,10 +1,12 @@
 <template>
-    <div>
+    <div class="form_container">
       <h2>Вход</h2>
       <form @submit.prevent="login">
-        <input v-model="email" type="email" placeholder="Email" required />
-        <input v-model="password" type="password" placeholder="Пароль" required />
-        <button type="submit">Войти</button>
+        <input class="auth_input" v-model="email" type="email" placeholder="Email" required />
+        <br>
+        <input class="auth_input" v-model="password" type="password" placeholder="Пароль" required />
+        <br>
+        <button type="submit" class="default_button logout_button">Войти</button>
       </form>
     </div>
   </template>

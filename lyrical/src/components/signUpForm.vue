@@ -1,11 +1,14 @@
 <template>
-    <div>
+    <div class="form_container">
       <h2>Зарегистрироваться</h2>
       <form @submit.prevent="signUp">
-        <input v-model="username" type="text" placeholder="Ваш логин" required />
-        <input v-model="email" type="email" placeholder="Email" required />
-        <input v-model="password" type="password" placeholder="Пароль" required />
-        <button type="submit">Зарегистрироваться</button>
+        <input class="auth_input" model="username" type="text" placeholder="Ваш логин" required />
+        <br>
+        <input class="auth_input" v-model="email" type="email" placeholder="Email" required />
+        <br>
+        <input class="auth_input" v-model="password" type="password" placeholder="Пароль" required />
+        <br>
+        <button type="submit" class="default_button logout_button">Зарегистрироваться</button>
       </form>
     </div>
   </template>
@@ -42,4 +45,3 @@
     }
   };
   </script>
-  
