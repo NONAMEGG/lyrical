@@ -3,6 +3,16 @@
 <div v-if="song.title">
     <h1>{{ song.title }}  {{ songRating }} <span @click="likeSong">like</span></h1>
     <router-link :to="`/artist/${artistId}`">{{ song.artist }}</router-link>
+    <button v-if="user.role" @click="deleteSong(song.id)">Удалить песню</button>
+    <button v-if="user.role" @click="showForm = !showForm">Изменить песню</button>
+    <div v-if="showForm">
+  <input v-model="songName" type="text" placeholder="Название песни">
+  <textarea v-model="lyricsText" class="lyrics-input" placeholder="Текст песни"></textarea>
+  <br>
+  <textarea v-model="description" class="lyrics-input" placeholder="Описание песни"></textarea>
+  <br>
+  <button @click="tweakSongData">Сохранить</button>
+    </div>
     <div @mouseup="handleMouseUp" @click="handleClick" v-html="renderedLyrics" class="lyrics__container">
     </div>
     <div v-if="showTooltip" :style="tooltipStyle" class="tooltip">
@@ -15,10 +25,18 @@
     <div v-if="selectedExplanation" class="explanation-display">
         {{ selectedExplanation.explanation }}
         <button @click="clearExplanation">x</button>
+        <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, -1)"><</button>
+        <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, 0)">{{ selectedExplanationRating }}</button>
+        <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, 1)">></button>
         <textarea v-model="explComment" class="comment-input" placeholder="Добавьте свой комментарий..." @keydown.enter.prevent="addComment" :disabled="!isAuthenticated"></textarea>
         <button @click="addExplComment">Добавить комментарий</button>
         <div v-if="explComments.length != 0" class="comments-display">
             <div v-for="comment in explComments" :key="comment.id" class="comment">
+                
+                <button v-if="comment.user_id === user.id" @click="deleteExplComment(comment.id)">x</button>
+                <img :src="comment.profile_icon_path" alt="" style="width: 50px; height: 50px; border-radius: 50%;">
+                {{ comment.created_at }}
+                {{ comment.username }}
                 {{ comment.comment }}
             </div>
         </div>
@@ -32,6 +50,10 @@
     <button @click="addComment">Добавить комментарий</button>
     <div v-if="comments.length != 0" class="comments-display">
         <div v-for="comment in comments" :key="comment.id" class="comment">
+            <button v-if="comment.added_by === user.id" @click="deleteSongComment(comment.id)">x</button>
+            <img :src="comment.profile_icon_path" alt="" style="width: 50px; height: 50px; border-radius: 50%;">
+            {{ comment.created_at }}
+            {{ comment.username }}
             {{ comment.comment }}
         </div>
     </div>
@@ -59,7 +81,13 @@ import {
     fetchCommentsForExplanation,
     fetchArtists,
     likeDislikeSong,
-    getSongsRatings
+    getSongsRatings,
+    deleteCommentOnSong,
+    deleteExplanationComment,
+    fetchExplanationRating,
+    likeDislikeExplanation,
+    deleteUsersSong,
+    updateSongData
 } from '../lib/common_methods';
 import Header from '../components/header.vue';
 export default {
@@ -89,6 +117,12 @@ export default {
         const artistId = ref(0);
         const isLiked = ref(false);
         const songRating = ref(0);
+        const selectedExplanationRating = ref(0);
+        const isAlreadyGivenRating = ref(false);
+        const showForm = ref(false);
+        const lyricsText = ref('');
+        const description = ref('');
+        const songName = ref('');
         const fetchRating = async () => {
           try {
             const data = await getSongsRatings(songID);
@@ -139,6 +173,11 @@ export default {
                     const data = await addExplanationComment(user.value.id, explComment.value, selectedExplanation.value.id);
                     console.log(data);
                     const explData = await fetchExplanationComments(selectedExplanation.value.id);
+                    for (let i = 0; i < explData.length; i++) {
+                        const date = new Date(data[i].created_at);
+            const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+            data[i].created_at = formattedDate;
+        }
                     explComments.value = explData;
                     explComment.value = '';
                 }
@@ -271,7 +310,13 @@ export default {
                     if (explanation) {
                         selectedExplanation.value = explanation;
                         const data = await fetchExplanationComments(selectedExplanation.value.id);
+                        await getRatingOfSelectedExplanation();
                         console.log(data);
+                        for (let i = 0; i < data.length; i++) {
+                            const date = new Date(data[i].created_at);
+            const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+            data[i].created_at = formattedDate;
+                        }
                         explComments.value = data;
                     }
                 }
@@ -321,10 +366,31 @@ export default {
             return result;
         });
 
+        const deleteSong = async (songId) => {
+        try {
+        await deleteUsersSong(songId);
+        
+        songs.value.splice(index, 1); 
+        this.$router.push('/');
+      } catch (error) {
+          console.error('Ошибка загрузки изображения:', error);  
+        }
+      }
+
+
         const fetchComments = async () => {
             try {
+                
                 const data = await fetchSongsComments(songID);
+                console.log(data);
+                for (let i = 0; i < data.length; i++) {
+                    const date = new Date(data[i].created_at);
+            const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+            data[i].created_at = formattedDate;
+        }
+                console.log(data);
                 comments.value = data;
+                console.log(comments);
             } catch (error) {
                 console.error(error);
             }
@@ -345,10 +411,69 @@ export default {
             }
 
         }
+        const deleteExplComment = async (id) => {
+            try {
+                await deleteExplanationComment(id);
+                const explData = await fetchExplanationComments(selectedExplanation.value.id);
+                    for (let i = 0; i < explData.length; i++) {
+                        const date = new Date(data[i].created_at);
+            const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+            data[i].created_at = formattedDate;
+        }
+                    explComments.value = explData;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        const deleteSongComment = async (id) => {
+            try {
+                await deleteCommentOnSong(id);
+                await fetchComments();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        const setRatingOfSelectedExplanation = async (id, rating) => {
+            try {
+                console.log('hello');
+                await likeDislikeExplanation(id, user.value.id, rating);
+                await getRatingOfSelectedExplanation();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        const getRatingOfSelectedExplanation = async () => {
+            try {
+                const data = await fetchExplanationRating(selectedExplanation.value.id);
+                selectedExplanationRating.value = data;
+                console.log(selectedExplanationRating.value);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        const tweakSongData = async () => {
+            try {
+                await updateSongData(songID, lyricsText.value == '' ? null : lyricsText.value, description.value == '' ? null : description.value,
+                 songName.value == '' ? null : songName.value);
+                window.location.reload();
+            } catch (error) {
+                console.error(error);
+            }
+        }
 
         fetchComments();
         fetchRating();
         return {
+            songName,
+            tweakSongData,
+            setRatingOfSelectedExplanation,
+            getRatingOfSelectedExplanation,
+            selectedExplanationRating,
+            deleteSong,
             isAuthenticated,
             user,
             song,
@@ -374,7 +499,12 @@ export default {
             getArtistId,
             artistId,
             likeSong,
-            songRating
+            songRating,
+            deleteSongComment,
+            deleteExplComment,
+            showForm,
+            lyricsText,
+            description
         };
     },
 };

@@ -11,8 +11,8 @@
     </div>
             </router-link>
         </div>
-        <div v-else>
-        loading....
+        <div v-else-if="artistSongs.length == 0">
+        
     </div>
     </div>
     <div v-else>loading.....</div>

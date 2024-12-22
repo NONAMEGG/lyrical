@@ -179,7 +179,7 @@ export async function addSong(songName, lyrics, description, artistId, userId) {
   try {
     const { data, error } = await supabase.rpc("add_song", {
       p_name: songName,
-      p_lyrics: lyrics,
+      p_lyrics: lyrics.value.replace(/\n/g, "<br>\n").replace(/\s\s+/g, ""),
       p_description: description,
       artist_id: artistId,
       user_id: userId,
@@ -392,6 +392,150 @@ export async function getArtistsRatings(artistId) {
       throw new Error(error.message);
     }
     return data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteCommentOnSong(comment_id) {
+  try {
+    const { error } = await supabase.rpc("delete_song_comment", {
+      p_comment_id: comment_id,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteExplanationComment(comment_id) {
+  try {
+    const { error } = await supabase.rpc("delete_explanation_comment", {
+      p_expl_comment_id: comment_id,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function fetchExplanationRating(explanationId) {
+  try {
+    const { data, error } = await supabase.rpc("fetch_explanation_rating", {
+      p_explanation_id: explanationId,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function likeDislikeExplanation(explanationId, userId, newValue) {
+  try {
+    console.log(explanationId, userId, newValue);
+    const { error } = await supabase.rpc("add_rating_to_explanation", {
+      p_explanation_id: explanationId,
+      p_new_rating: newValue,
+      p_user_id: userId,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function fetchUnapprovedSongs() {
+  try {
+    const { data, error } = await supabase.rpc("fetch_unapproved_songs");
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function approveSong(songId) {
+  try {
+    const { error } = await supabase.rpc("approve_song", {
+      p_song_id: songId,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function fetchUnreviewedExplanations() {
+  try {
+    const { data, error } = await supabase.rpc("fetch_unapproved_explanations");
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function approveExplanation(explanationId) {
+  try {
+    const { error } = await supabase.rpc("approve_explanation", {
+      p_explanation_id: explanationId,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteExplanation(explanationId) {
+  try {
+    const { error } = await supabase.rpc("delete_explanation", {
+      p_explanation_id: explanationId,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateSongData(
+  songId,
+  newLyrics = null,
+  newDescription = null,
+  newSongName = null
+) {
+  try {
+    const { error } = await supabase.rpc("update_song_data", {
+      p_song_id: songId,
+      p_lyrics: newLyrics,
+      p_description: newDescription,
+      p_song_name: newSongName,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
   } catch (error) {
     throw new Error(error.message);
   }

@@ -34,7 +34,7 @@
         try {
           const usr = await authenticateUser(this.email, this.password);
           
-          this.login({ email: usr.email, id: usr.id, username: usr.username, icon: usr.profile_icon_path });
+          this.login({ email: usr.email, id: usr.id, username: usr.username, icon: usr.profile_icon_path, role: usr.Role });
           this.$router.push('/');
         } catch (error) {
           alert(error.message);

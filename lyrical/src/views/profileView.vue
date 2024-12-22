@@ -7,6 +7,7 @@
     <button @click="uploadPI">Загрузить картинку</button>
       <div>Имя: {{user.username}}</div>
     <div>Почта: {{user.email}}</div>
+    <router-link v-if="user.role" to="/contributor_panel">Перейти на страницу контрибьютора</router-link>
     <button @click="logout">Выйти</button>
     <div v-if="artists">
     <button @click="showForm = !showForm">Добавить песню</button>

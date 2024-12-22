@@ -2,7 +2,7 @@
     <div class="form_container">
       <h2>Зарегистрироваться</h2>
       <form @submit.prevent="signUp">
-        <input class="auth_input" model="username" type="text" placeholder="Ваш логин" required />
+        <input class="auth_input" v-model="username" type="text" placeholder="Ваш логин" required />
         <br>
         <input class="auth_input" v-model="email" type="email" placeholder="Email" required />
         <br>
@@ -16,13 +16,14 @@
 
 <script>
   import { inject } from 'vue';
-  import { signup } from '../lib/common_methods';
+  import { signup, authenticateUser } from '../lib/common_methods';
   
   export default {
     data() {
       return {
         email: '',
-        password: ''
+        password: '',
+        username: ''
       };
     },
     setup() {
@@ -36,7 +37,9 @@
         try {
           await signup(this.email, this.password, this.username);
 
-          this.login({ email: this.email, username: this.username });
+          const usr = await authenticateUser(this.email, this.password);
+          
+          this.login({ email: usr.email, id: usr.id, username: this.username, icon: usr.profile_icon_path, role: usr.Role });
           this.$router.push('/');
         } catch (error) {
           alert(error.message);

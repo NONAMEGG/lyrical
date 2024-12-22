@@ -37,7 +37,7 @@
       <div class="recently_added_songs" v-if="recentlyAddedSongs.length != 0">
           <div class="link search_song_link" :to="`/lyrics/${song.id}`"  v-for="song in recentlyAddedSongs" :key="song.id">
             <router-link class="link search_song_link" :to="`/lyrics/${song.id}`">{{ song.name }} <br> {{ song.description }}</router-link> {{ song.rating }}
-          <span @click="likeSong(song.id)">like</span>
+          <span @click="likeRecentSong(song.id)">like</span>
         </div>
         </div>
         <div v-else>
@@ -90,7 +90,26 @@
       const fetchRating = async (songId) => {
         try {
           const data = await getSongsRatings(songId);
-          mostRatedSongs.value.find(song => song.id === songId).rating = data;
+          if (data) {
+            mostRatedSongs.value.find(song => song.id === songId).rating = data;
+          } else {
+            mostRatedSongs.value.find(song => song.id === songId).rating = 0;
+          }
+          
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      const fetchRatingForRecentlyAdded = async (songId) => {
+        try {
+          const data = await getSongsRatings(songId);
+          if (data) {
+            recentlyAddedSongs.value.find(song => song.id === songId).rating = data;
+          } else {
+            recentlyAddedSongs.value.find(song => song.id === songId).rating = 0;
+          }
+          
         } catch (error) {
           console.error(error);
         }
@@ -115,11 +134,27 @@
               const data = await likeDislikeSong(songId, user.value.id);
               isLiked.value = !isLiked.value;
               await fetchRating(songId);
+              await fetchRatingForRecentlyAdded(songId);
             }
             
           } catch (error) {
             console.error(error);
           }
+        }
+
+        const likeRecentSong = async (songId) => {
+          try {
+            if (isAuthenticated.value) {
+              const data = await likeDislikeSong(songId, user.value.id);
+              isLiked.value = !isLiked.value;
+              await fetchRatingForRecentlyAdded(songId);
+              await fetchRating(songId);
+            }
+            
+          } catch (error) {
+            console.error(error);
+          }
+          
         }
 
       getRatings();
@@ -128,7 +163,8 @@
       mostRatedSongs,
       recentlyAddedSongs,
       likeSong,
-      likeArtist
+      likeArtist,
+      likeRecentSong
     };
     
   },
