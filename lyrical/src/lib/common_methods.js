@@ -1,10 +1,10 @@
 import { supabase } from "./supaBase";
 
-export async function authenticateUser(email, password) {
+export async function authenticateUser(email_or_login, p_password) {
   try {
     const { data, error } = await supabase.rpc("authenticate_user", {
-      email,
-      password,
+      email_or_login,
+      p_password,
     });
     if (error) throw error;
     return data;
@@ -179,7 +179,7 @@ export async function addSong(songName, lyrics, description, artistId, userId) {
   try {
     const { data, error } = await supabase.rpc("add_song", {
       p_name: songName,
-      p_lyrics: lyrics.value.replace(/\n/g, "<br>\n").replace(/\s\s+/g, ""),
+      p_lyrics: lyrics.replace(/\n/g, "<br>\n").replace(/\s\s+/g, ""),
       p_description: description,
       artist_id: artistId,
       user_id: userId,
@@ -529,9 +529,78 @@ export async function updateSongData(
   try {
     const { error } = await supabase.rpc("update_song_data", {
       p_song_id: songId,
-      p_lyrics: newLyrics,
+      p_lyrics: newLyrics.replace(/\n/g, "<br>\n").replace(/\s\s+/g, ""),
       p_description: newDescription,
       p_song_name: newSongName,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateUser(
+  userId,
+  username = null,
+  email = null,
+  password = null
+) {
+  try {
+    const { error } = await supabase.rpc("update_user", {
+      p_user_id: userId,
+      new_username: username,
+      new_email: email,
+      new_password: password,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteUser(userId) {
+  try {
+    console.log(userId);
+    const { error } = await supabase.rpc("delete_user", {
+      p_user_id: userId,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateArtist(
+  artistId,
+  name = null,
+  realName = null,
+  description = null
+) {
+  try {
+    const { error } = await supabase.rpc("update_artist", {
+      p_artist_id: artistId,
+      new_name: name,
+      new_real_name: realName,
+      new_description: description,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteArtist(artistId) {
+  try {
+    const { error } = await supabase.rpc("delete_artist", {
+      p_artist_id: artistId,
     });
     if (error) {
       throw new Error(error.message);

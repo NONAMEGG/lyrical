@@ -2,7 +2,7 @@
     <div class="form_container">
       <h2>Вход</h2>
       <form @submit.prevent="login">
-        <input class="auth_input" v-model="email" type="email" placeholder="Email" required />
+        <input class="auth_input" v-model="email" type="text" placeholder="Email" required />
         <br>
         <input class="auth_input" v-model="password" type="password" placeholder="Пароль" required />
         <br>

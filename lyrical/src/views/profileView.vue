@@ -7,6 +7,19 @@
     <button @click="uploadPI">Загрузить картинку</button>
       <div>Имя: {{user.username}}</div>
     <div>Почта: {{user.email}}</div>
+    <div>
+      <button @click="showUserUpdateForm = !showUserUpdateForm">Изменить аккаунт</button>
+      <div v-if="showUserUpdateForm">
+        <input class="auth_input" v-model="newUsername" type="text" placeholder="Ваш логин" required />
+        <br>
+        <input class="auth_input" v-model="newEmail" type="email" placeholder="Email" required />
+        <br>
+        <input class="auth_input" v-model="newPassword" type="password" placeholder="Пароль" required />
+        <br>
+        <button @click="updateUserInfo">Сохранить</button>
+      </div>
+    </div>
+    <button @click="deleteAccount">Удалить аккаунт</button>
     <router-link v-if="user.role" to="/contributor_panel">Перейти на страницу контрибьютора</router-link>
     <button @click="logout">Выйти</button>
     <div v-if="artists">
@@ -62,7 +75,10 @@
 <script>
   import Header from '../components/header.vue';
   import { ref, inject, computed } from 'vue';
-  import { uploadProfileIcon, fetchAddedSongs, deleteUsersSong, fetchArtists, addArtist, addSong } from '../lib/common_methods'; 
+  import { useRouter } from 'vue-router';
+  import { uploadProfileIcon, fetchAddedSongs, deleteUsersSong, fetchArtists, addArtist, addSong,
+    deleteUser, updateUser
+   } from '../lib/common_methods'; 
   
 
   export default {
@@ -72,15 +88,21 @@
     data() {
       return {
       showForm: false,
+      showUserUpdateForm: false,
       };
     },
     setup() {
       const isAuthenticated = inject('isAuthenticated');
       const user = inject('user');
       const logout = inject('logout');
+      const login = inject('login');
       const profileIconUrl = computed(() => user.value.icon);
+      const newUsername = ref('');
+      const newPassword = ref('');
+      const newEmail = ref('');
       const songs = ref([]);
       const artists = ref([]);
+      const router = useRouter();
       const selectedArtist = ref('');
       const newArtist = ref({
       id: 0,
@@ -162,10 +184,44 @@
   }
 };
 
+const deleteAccount = async () => {
+  try {
+    await deleteUser(user.value.id);
+    logout();
+  } catch (error) {
+    
+  }
+}
+
+const updateUserInfo = async () => {
+  try {
+    await updateUser(user.value.id, newUsername.value == '' ? null : newUsername.value, newEmail.value == '' ? null : newEmail.value,
+    newPassword.value == '' ? null : newPassword.value);
+    if (newPassword.value != '') {
+      const usr = await authenticateUser(newEmail.value == '' ? user.value.email : newEmail.value, newPassword.value);  
+      login({ email: usr.email, id: usr.id, username: usr.username, icon: usr.profile_icon_path, role: usr.Role });
+    }
+    else {
+      logout();
+      router.push('/auth');
+    }
+    
+    router.push('/');
+                    
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 
       fetchArtistsForUser();
       fetchUsersSongs();
       return {
+        newUsername,
+        newEmail,
+        newPassword,
+        updateUserInfo,
         isAuthenticated,
         user,
         logout,
@@ -181,7 +237,8 @@
         newArtist,
         songName,
         lyricsText,
-        description
+        description,
+        deleteAccount
       };
     }
   }

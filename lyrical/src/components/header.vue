@@ -57,9 +57,12 @@
         console.log(searchQuery.value);
         songs.value = [];
         try {
+          if (searchQuery.value != '') {
             const data = await searchSongs(searchQuery.value);
             console.log(data);
             songs.value = data;
+          }
+            
         } catch (error) {
           console.error('Error fetching songs:', error);  
         }

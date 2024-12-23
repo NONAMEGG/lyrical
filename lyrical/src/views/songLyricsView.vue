@@ -23,8 +23,9 @@
         </div>
     </div>
     <div v-if="selectedExplanation" class="explanation-display">
-        {{ selectedExplanation.explanation }}
+        <div v-html="selectedExplanation.explanation" class="explanation_text"></div>
         <button @click="clearExplanation">x</button>
+        <button @click="deleteExplanationOnSong">Удалить</button>
         <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, -1)"><</button>
         <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, 0)">{{ selectedExplanationRating }}</button>
         <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, 1)">></button>
@@ -69,7 +70,7 @@ import {
     computed
 } from 'vue';
 import {
-    useRoute
+    useRoute, useRouter
 } from 'vue-router';
 import {
     fetchSongLyrics,
@@ -87,7 +88,8 @@ import {
     fetchExplanationRating,
     likeDislikeExplanation,
     deleteUsersSong,
-    updateSongData
+    updateSongData,
+    deleteExplanation
 } from '../lib/common_methods';
 import Header from '../components/header.vue';
 export default {
@@ -100,6 +102,7 @@ export default {
         const song = ref({});
         const explanations = ref([]);
         const route = useRoute();
+        const router = useRouter();
         const songID = route.params.id;
         const showTooltip = ref(false);
         const showExplanationInput = ref(false);
@@ -174,9 +177,9 @@ export default {
                     console.log(data);
                     const explData = await fetchExplanationComments(selectedExplanation.value.id);
                     for (let i = 0; i < explData.length; i++) {
-                        const date = new Date(data[i].created_at);
+                        const date = new Date(explData[i].created_at);
             const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-            data[i].created_at = formattedDate;
+            explData[i].created_at = formattedDate;
         }
                     explComments.value = explData;
                     explComment.value = '';
@@ -221,56 +224,105 @@ export default {
         };
 
         const createIndexMapping = (lyricsWithBr) => {
-            const mapping = [];
-            let plainTextIndex = 0;
+    const mapping = [];
+    let plainTextIndex = 0;
+    let i = 0;
 
-            for (let i = 0; i < lyricsWithBr.length; i++) {
-                if (lyricsWithBr[i] === '<' && lyricsWithBr.slice(i, i + 4).toLowerCase() === '<br>') {
-                    // Skip over the <br> tag
-                    i += 3;
-                } else {
-                    mapping[plainTextIndex] = i;
-                    plainTextIndex++;
+    while (i < lyricsWithBr.length) {
+        if (lyricsWithBr.startsWith('<br>', i)) {
+            i += 4;
+            // Check if there is another <br> after a newline
+            if (lyricsWithBr[i] === '\n') {
+                 // Skip the newline character
+                if (lyricsWithBr.startsWith('<br>', i+1)) {
+                    i++;
+                    continue; // Skip to the next loop iteration to catch this <br>
                 }
             }
+        } else if (lyricsWithBr.startsWith('<br/>', i)) {
+            i += 5;
+            if (lyricsWithBr[i] === '\n') {
+                i++;
+                if (lyricsWithBr.startsWith('<br/>', i)) {
+                    continue;
+                }
+            }
+        } else if (lyricsWithBr.startsWith('<br />', i)) {
+            i += 6;
+            if (lyricsWithBr[i] === '\n') {
+                i++;
+                if (lyricsWithBr.startsWith('<br />', i)) {
+                    continue;
+                }
+            }
+        } else {
+            mapping[plainTextIndex] = i;
+            plainTextIndex++;
+            i++;
+        }
+    }
 
-            return mapping;
-        };
+    return mapping;
+};
+
+
+
+
+
+
+
 
         const handleMouseUp = () => {
             const selection = window.getSelection();
-            let selectedTextValue = selection.toString();
+let selectedTextValue = selection.toString().trim(); // Trim any leading/trailing spaces
 
-            if (selectedTextValue.length > 0 && isAuthenticated.value) {
-                console.log(isAuthenticated);
-                const range = selection.getRangeAt(0);
-                const rect = range.getBoundingClientRect();
+if (selectedTextValue.length > 0 && isAuthenticated.value) {
+    console.log(isAuthenticated);
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    console.log(song.value.lyrics);
+    // Original lyrics with <br> tags
+    const lyricsWithBr = song.value.lyrics;
+    console.log(lyricsWithBr);
+    // Remove <br> tags and normalize spaces
+    let lyricsText = lyricsWithBr.replace(/<br\s*\/?>/gi, ' ');
 
-                // Calculate start and end indices
-                let lyricsText = song.value.lyrics.replace(/<br\s*\/?>/gi, '');
-                console.log(song.value.lyrics);
-                const indexMapping = createIndexMapping(song.value.lyrics);
+    // Normalize function
+    console.log(lyricsText);
+    const normalizeText = (text) => text.replace(/\r\n|\r|\n/g, ' ').replace(/\s+/g, ' ').trim();
+    console.log(selectedTextValue);
+    // Apply normalization
+    lyricsText = normalizeText(lyricsText);
+    selectedTextValue = normalizeText(selectedTextValue);
 
-                const normalizeLineEndings = (text) => text.replace(/\r\n|\r|\n/g, ' ');
-                lyricsText = normalizeLineEndings(lyricsText);
-                selectedTextValue = normalizeLineEndings(selectedTextValue);
-                console.log(lyricsText);
-                const startIdx = lyricsText.indexOf(selectedTextValue);
-                
-                const endIdx = startIdx + selectedTextValue.length - 1;
-                console.log(startIdx, endIdx);
-                const startIdxWithBr = indexMapping[startIdx];
-                const endIdxWithBr = indexMapping[endIdx];
-                console.log(startIdx, endIdx);
-                for (let i = 0; i < selectedTextValue.length - 1; i++) {
-                    if (selectedTextValue[i] != lyricsText[i]) {
-                        // console.log(i, selectedTextValue[i], lyricsText[i]);
-                    }
-                }
-                // console.log(lyricsText);
-                // console.log(startIdx);
-                // Check for any overlap with existing explanations
-                const hasOverlap = explanations.value.some(
+    console.log("Normalized Lyrics Text:", lyricsText);
+    console.log("Normalized Selected Text:", selectedTextValue);
+
+    // Find start index in normalized lyrics
+    const startIdx = lyricsText.indexOf(selectedTextValue);
+    console.log(selectedTextValue.length);
+    const endIdx = startIdx + selectedTextValue.length - 1;
+
+    console.log("Normalized Start Index:", startIdx, "End Index:", endIdx);
+
+    // Create index mapping from original lyrics
+    const indexMapping = createIndexMapping(lyricsWithBr);
+    console.log(indexMapping);
+    // Check if indices are valid
+    if (startIdx >= 0 && endIdx < indexMapping.length) {
+        const startIdxWithBr = indexMapping[startIdx];
+        const endIdxWithBr = indexMapping[endIdx];
+
+        console.log("Original Start Index with <br>:", startIdxWithBr);
+        console.log("Original End Index with <br>:", endIdxWithBr);
+
+        // Detailed character comparison log
+        for (let i = 0; i < selectedTextValue.length; i++) {
+            if (selectedTextValue[i] !== lyricsWithBr[i + startIdxWithBr]) {
+                console.log(i, selectedTextValue[i], lyricsWithBr[i + startIdxWithBr]);
+            }
+        }
+        const hasOverlap = explanations.value.some(
                     (ex) => !(endIdxWithBr < ex.idx_start || startIdxWithBr > ex.idx_end)
                 );
 
@@ -291,6 +343,17 @@ export default {
                 } else {
                     showTooltip.value = false;
                 }
+    } else {
+        console.error("Selected text not found in normalized lyrics text or index out of bounds.");
+        
+    }
+
+
+
+                // console.log(lyricsText);
+                // console.log(startIdx);
+                // Check for any overlap with existing explanations
+                
             } else {
                 showTooltip.value = false;
             }
@@ -330,48 +393,49 @@ export default {
         };
 
         const renderedLyrics = computed(() => {
-            let result = '';
-            const lyrics = song.value.lyrics || '';
-            const sortedExplanations = [...explanations.value].sort((a, b) => a.idx_start - b.idx_start);
-            let actualIndex = 0;
-            let visibleIndex = 0;
+    let result = '';
+    const lyrics = song.value.lyrics || '';
+    const sortedExplanations = [...explanations.value].sort((a, b) => a.idx_start - b.idx_start);
+    let actualIndex = 0;
+    let visibleIndex = 0;
 
-            sortedExplanations.forEach(ex => {
-                const idx_start = ex.idx_start;
-                const idx_end = ex.idx_end;
+    sortedExplanations.forEach(ex => {
+        const idx_start = ex.idx_start;
+        const idx_end = ex.idx_end;
 
-                while (visibleIndex < idx_start && actualIndex < lyrics.length) {
-                    result += lyrics.charAt(actualIndex);
-                    actualIndex++;
-                    visibleIndex++;
-                }
+        while (visibleIndex < idx_start && actualIndex < lyrics.length) {
+            result += lyrics.charAt(actualIndex);
+            actualIndex++;
+            visibleIndex++;
+        }
 
-                let highlightText = '';
-                while (visibleIndex <= idx_end && actualIndex < lyrics.length) {
-                    highlightText += lyrics.charAt(actualIndex);
-                    actualIndex++;
-                    visibleIndex++;
-                }
-                if (highlightText) {
-                    result += `<span class="highlighted" data-start="${idx_start}" data-end="${idx_end}">${highlightText}</span>`;
-                }
-            });
+        let highlightText = '';
+        while (visibleIndex <= idx_end && actualIndex < lyrics.length) {
+            highlightText += lyrics.charAt(actualIndex);
+            actualIndex++;
+            visibleIndex++;
+        }
 
-            while (actualIndex < lyrics.length) {
+        if (highlightText) {
+            result += `<span class="highlighted" data-start="${idx_start}" data-end="${idx_end}">${highlightText}</span>`;
+        }
+    });
 
-                result += lyrics.charAt(actualIndex);
-                actualIndex++;
-            }
+    while (actualIndex < lyrics.length) {
+        result += lyrics.charAt(actualIndex);
+        actualIndex++;
+    }
 
-            return result;
-        });
+    return result;
+});
+
 
         const deleteSong = async (songId) => {
         try {
         await deleteUsersSong(songId);
         
-        songs.value.splice(index, 1); 
-        this.$router.push('/');
+    
+        router.push('/');
       } catch (error) {
           console.error('Ошибка загрузки изображения:', error);  
         }
@@ -465,9 +529,16 @@ export default {
             }
         }
 
+        const deleteExplanationOnSong = async () => {
+            await deleteExplanation(selectedExplanation.value.id);
+            clearExplanation();
+            await fetch();
+        }
+
         fetchComments();
         fetchRating();
         return {
+            deleteExplanationOnSong,
             songName,
             tweakSongData,
             setRatingOfSelectedExplanation,
@@ -577,5 +648,10 @@ export default {
     margin-bottom: 5px;
     padding: 5px;
     border-bottom: 1px solid #ddd;
+}
+
+.explanation_text {
+    max-height: 100px;
+    overflow-y: scroll;
 }
 </style>
