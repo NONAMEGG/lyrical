@@ -1,14 +1,15 @@
 <template>
   <Header></Header>
+  <div class="main_profile_container">
   <div>
   <img class="profile_image" :src="profileIconUrl" alt="Profile Icon"/>
 </div>
-  <input type="file" @change="handleFileChange" accept="image/*" />
+  <input type="file" @change="handleFileChange" accept="image/*" class="update_image_button"/>
     <button @click="uploadPI">Загрузить картинку</button>
       <div>Имя: {{user.username}}</div>
     <div>Почта: {{user.email}}</div>
     <div>
-      <button @click="showUserUpdateForm = !showUserUpdateForm">Изменить аккаунт</button>
+      <button @click="showUserUpdateForm = !showUserUpdateForm" class="update_account_button">Изменить аккаунт</button>
       <div v-if="showUserUpdateForm">
         <input class="auth_input" v-model="newUsername" type="text" placeholder="Ваш логин" required />
         <br>
@@ -21,9 +22,8 @@
     </div>
     <button @click="deleteAccount">Удалить аккаунт</button>
     <router-link v-if="user.role" to="/contributor_panel">Перейти на страницу контрибьютора</router-link>
-    <button @click="logout">Выйти</button>
-    <div v-if="artists">
-    <button @click="showForm = !showForm">Добавить песню</button>
+    <div v-if="artists" class="add_artist_form">
+    <button @click="showForm = !showForm" class="show_form_button">Добавить песню</button>
     <div v-if="showForm">
   <input v-model="songName" type="text" placeholder="Название песни" required>
   <select v-model="selectedArtist">
@@ -35,12 +35,12 @@
     <input v-model="newArtist.name" type="text" placeholder="Имя артиста" required>
     <input v-model="newArtist.real_name" type="text" placeholder="Настоящее имя артиста" required>
     <br>
-    <textarea v-model="newArtist.description" placeholder="Описание артиста"></textarea>
+    <textarea v-model="newArtist.description" placeholder="Описание артиста" class="textarea_profile"></textarea>
   </div>
   <br>
-  <textarea v-model="lyricsText" class="lyrics-input" placeholder="Текст песни"></textarea>
+  <textarea v-model="lyricsText" class="lyrics-input textarea_profile" placeholder="Текст песни"></textarea>
   <br>
-  <textarea v-model="description" class="lyrics-input" placeholder="Описание песни"></textarea>
+  <textarea v-model="description" class="lyrics-input textarea_profile" placeholder="Описание песни" ></textarea>
   <br>
   <button @click="addSongClick">Добавить</button>
   </div>
@@ -56,10 +56,11 @@
         <router-link :to="`/lyrics/${song.id}`" active-class="active-link">
         {{ song.title }} by {{ song.artist }} (подтверждена) 
       </router-link>
+      <br>
       <button @click="deleteSong(song.id)">Удалить</button>
     </div>
     <div v-else>
-      {{ song.title }} by {{ song.artist }} (не подтверждена) <button @click="deleteSong(song.id)">Удалить</button>
+      {{ song.title }} by {{ song.artist }} (не подтверждена)<br> <button @click="deleteSong(song.id)">Удалить</button>
     </div>
       </li>
     </ul>
@@ -69,6 +70,7 @@
     <div v-else>
     Loading...
   </div>
+</div>
     <router-view />
 </template>
 
@@ -85,12 +87,6 @@
     components: {
       Header
     },
-    data() {
-      return {
-      showForm: false,
-      showUserUpdateForm: false,
-      };
-    },
     setup() {
       const isAuthenticated = inject('isAuthenticated');
       const user = inject('user');
@@ -104,6 +100,8 @@
       const artists = ref([]);
       const router = useRouter();
       const selectedArtist = ref('');
+      const showForm = ref(false);
+      const showUserUpdateForm = ref(false);
       const newArtist = ref({
       id: 0,
       name: '',
@@ -145,6 +143,8 @@
         alert('Сначала выберите изображение');
         return;
       }
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (validImageTypes.includes(selectedFile.type)) {
         try {
         const data = await uploadProfileIcon(selectedFile, user.value.id);
         user.value.icon = data; 
@@ -153,6 +153,10 @@
       } catch (error) {
           console.error('Ошибка загрузки изображения:', error);  
         }
+      } else {
+        alert("Выбранный файл не является изображением.");
+      }
+        
       }
 
       const deleteSong = async (songId) => {
@@ -172,15 +176,33 @@
     console.log(selectedArtist.value);
     if (selectedArtist.value === 'new') {
       const artistId = await addArtist(newArtist.value);
-      newArtist.value.id = artistId; 
+
+        newArtist.value.id = artistId; 
       artists.value.push(newArtist.value);
-      selectedArtist.value = artistId;
+      selectedArtist.value = artistId;      
     }
     console.log(lyricsText.value);
     const songId = await addSong(songName.value, lyricsText.value.replace(/\n/g, '<br>\n').replace(/\s\s+/g, ''), description.value, selectedArtist.value, user.value.id);
+    if (songId && selectedArtist.value === 'new') {
+      alert("Артист и песня успешно добавлены");
+      newArtist.value.name = '';
+      newArtist.value.real_name = '';
+      newArtist.value.description = '';
+      songName.value = '';
+      lyricsText.value = '';
+      description.value = '';
+      showForm.value = false;
+    }else if (songId) {
+      alert("Песня успешно добавлена");
+      songName.value = '';
+      lyricsText.value = '';
+      description.value = '';
+      showForm.value = false;
+    }
     await fetchUsersSongs();
+    
   } catch (error) {
-    console.error('Ошибка загрузки изображения:', error);  
+    console.log('Ошибка добавления:', error);  
   }
 };
 
@@ -238,7 +260,9 @@ const updateUserInfo = async () => {
         songName,
         lyricsText,
         description,
-        deleteAccount
+        deleteAccount,
+        showUserUpdateForm,
+        showForm
       };
     }
   }
@@ -250,4 +274,41 @@ const updateUserInfo = async () => {
     height: 100px;
   }
 
+  .main_profile_container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .update_image_button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-right: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .update_account_button {
+    width: 540px;
+  }
+
+  .add_artist_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .show_form_button {
+    width: 100px;
+  }
+
+  .textarea_profile {
+    width: 500px;
+  }
 </style>

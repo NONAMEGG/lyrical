@@ -31,7 +31,6 @@ app.mount("#app");
 const uid = localStorage.getItem("userLogin");
 if (uid) {
   const userData = JSON.parse(uid);
-  console.log(userData);
   isAuthenticated.value = true;
   user.value = userData;
 } else {

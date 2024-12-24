@@ -8,7 +8,7 @@
         <br>
         <input class="auth_input" v-model="password" type="password" placeholder="Пароль" required />
         <br>
-        <button type="submit" class="default_button logout_button">Зарегистрироваться</button>
+        <button type="submit" class="default_button logout_button login_button">Зарегистрироваться</button>
       </form>
     </div>
   </template>

@@ -53,13 +53,10 @@
       const showResults = ref(false);
   
       const search = async () => {
-        console.log(showResults);
-        console.log(searchQuery.value);
         songs.value = [];
         try {
           if (searchQuery.value != '') {
             const data = await searchSongs(searchQuery.value);
-            console.log(data);
             songs.value = data;
           }
             

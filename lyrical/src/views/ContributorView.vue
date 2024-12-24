@@ -1,21 +1,33 @@
 <template>
     <Header></Header>
     <div v-if="unapprovedSongs">
+        <h1>Песни к принятию</h1>
+        <div v-if="unapprovedSongs.length != 0">
         <div v-for="song in unapprovedSongs" :key="song.id">
             <p @click="showLyricsForSong(song.id)">{{ song.title }}</p>
             <button @click="approveSongClick(song.id)">Подтвердить</button>
             <button @click="deleteSong(song.id)">Удалить</button>
         </div>
     </div>
+    <div v-else>
+        Пользователи не добавили новых песен
+    </div>
+</div>
     <div v-html="songLyrics">
     </div>
 
     <div v-if="unapprovedExplanations">
+        <h1>Объяснения к принятию</h1>
+        <div v-if="unapprovedExplanations.length != 0">
         <div v-for="explanation in unapprovedExplanations">
             <p @click="showExplainedLyrics(explanation.id)">{{ explanation.explanation }}</p>
             <button @click="approveExplanationClick(explanation.id)">Подтвердить</button>
             <button @click="deleteExplanationClick(explanation.id)">Удалить</button>
         </div>
+    </div>
+    <div v-else>
+        Пользователи не добавили новых объяснений
+    </div>
     </div>
     <div v-html="songSample"></div>
 </template>

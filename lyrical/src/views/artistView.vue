@@ -1,9 +1,11 @@
 <template>
     <Header></Header>
-    <div v-if="artist.length != 0">
-        {{ artist[0].name }} {{ artistRating }} <span @click="likeArtist(artist.id)">like</span> <br>
-        {{ artist[0].real_name }} <br>
-        {{ artist[0].description }}
+    <div v-if="artist.length != 0" class="main_artist_container">
+        <h1>{{ artist[0].name }} <span class="top_rating">{{ artistRating ? artistRating : 0 }}</span> <img src="/heart-regular.svg" @click="likeArtist(artist.id)" alt="Поставить лайк" class="like_song_icon"> <br></h1>
+        Настоящее имя: {{ artist[0].real_name }} <br>
+        Об артисте: {{ artist[0].description }}
+          
+       
         <div v-if="user.role">
             <button @click="showForm = !showForm">Обновить данные об артисте</button>
             <div v-if="showForm">
@@ -17,7 +19,7 @@
             </div>
             <button @click="deleteArtistClick">Удалить артиста</button>
         </div>
-        
+        <h2>Песни артиста</h2>
         <div v-if="artistSongs.length != 0">
             <router-link v-for="song in artistSongs" :key="song.id"  :to="`/lyrics/${song.id}`" active-class="active-link">
                 <div>
@@ -29,7 +31,7 @@
         
     </div>
     </div>
-    <div v-else>loading.....</div>
+    <div v-else>Такого артиста нет</div>
     <router-view />
 </template>
 
@@ -136,3 +138,12 @@
     }
 
 </script>
+
+
+<style>
+.main_artist_container {
+    padding-left: 40px;
+    margin-top: 20px;
+    width: 80%;
+}
+</style>

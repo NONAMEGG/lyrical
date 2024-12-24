@@ -6,7 +6,7 @@
         <br>
         <input class="auth_input" v-model="password" type="password" placeholder="Пароль" required />
         <br>
-        <button type="submit" class="default_button logout_button">Войти</button>
+        <button type="submit" class="default_button logout_button login_button">Войти</button>
       </form>
     </div>
   </template>

@@ -1,40 +1,58 @@
 <template>
 <Header></Header>
-<div v-if="song.title">
-    <h1>{{ song.title }}  {{ songRating }} <span @click="likeSong">like</span></h1>
+<div v-if="song.title" class="main_lyricsview_container">
+    <div class="song_data">
+    <h1>{{ song.title }}  <span class="top_rating">{{ songRating ? songRating : 0 }}</span>  
+        <img src="/heart-regular.svg" @click="likeSong" alt="Поставить лайк" class="like_song_icon"></h1>
+        <br>
+        {{ song.description }}
+        <br>
+        <br>
     <router-link :to="`/artist/${artistId}`">{{ song.artist }}</router-link>
+    <br>
     <button v-if="user.role" @click="deleteSong(song.id)">Удалить песню</button>
+    <br>
     <button v-if="user.role" @click="showForm = !showForm">Изменить песню</button>
     <div v-if="showForm">
   <input v-model="songName" type="text" placeholder="Название песни">
-  <textarea v-model="lyricsText" class="lyrics-input" placeholder="Текст песни"></textarea>
   <br>
-  <textarea v-model="description" class="lyrics-input" placeholder="Описание песни"></textarea>
+  <textarea v-model="lyricsText" class="lyrics-input textarea_profile" placeholder="Текст песни"></textarea>
+  <br>
+  <textarea v-model="description" class="lyrics-input textarea_profile" placeholder="Описание песни"></textarea>
   <br>
   <button @click="tweakSongData">Сохранить</button>
+  </div>
     </div>
     <div @mouseup="handleMouseUp" @click="handleClick" v-html="renderedLyrics" class="lyrics__container">
     </div>
     <div v-if="showTooltip" :style="tooltipStyle" class="tooltip">
-        <button @click="toggleExplanationInput">Добавить объяснение</button>
+        <button @click="toggleExplanationInput" class="add_expl_prev_button">Добавить объяснение</button>
         <div v-if="showExplanationInput">
             <textarea v-model="explanationText" class="explanation-input" placeholder="Текст объяснения"></textarea>
-            <button @click="addExplanation">Сохранить</button>
+            <button @click="addExplanation" class="add_expl_prev_button">Сохранить</button>
         </div>
     </div>
     <div v-if="selectedExplanation" class="explanation-display">
+        <div v-if="!selectedExplanation.is_approved">
+            !Данное объяснения не было проверено!
+        </div>
+        <div class="top_container">
+            <div class="expl_rating_container">
+        <button class="explanation_rating_button" @click="setRatingOfSelectedExplanation(selectedExplanation.id, 1)">↑</button>
+        <button class="selected_explanation_rating" @click="setRatingOfSelectedExplanation(selectedExplanation.id, 0)">{{ selectedExplanationRating ? selectedExplanationRating : 0 }}</button>
+        <button class="explanation_rating_button" @click="setRatingOfSelectedExplanation(selectedExplanation.id, -1)">↓</button>
+    </div>
         <div v-html="selectedExplanation.explanation" class="explanation_text"></div>
-        <button @click="clearExplanation">x</button>
-        <button @click="deleteExplanationOnSong">Удалить</button>
-        <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, -1)"><</button>
-        <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, 0)">{{ selectedExplanationRating }}</button>
-        <button @click="setRatingOfSelectedExplanation(selectedExplanation.id, 1)">></button>
+        <button @click="clearExplanation" class="close_expl_button">x</button>
+    </div>
+        <button v-if="user.role || selectedExplanation.added_by == user.id" @click="deleteExplanationOnSong">Удалить</button>
+        
         <textarea v-model="explComment" class="comment-input" placeholder="Добавьте свой комментарий..." @keydown.enter.prevent="addComment" :disabled="!isAuthenticated"></textarea>
         <button @click="addExplComment">Добавить комментарий</button>
         <div v-if="explComments.length != 0" class="comments-display">
             <div v-for="comment in explComments" :key="comment.id" class="comment">
                 
-                <button v-if="comment.user_id === user.id" @click="deleteExplComment(comment.id)">x</button>
+                <button v-if="comment.user_id === user.id" class="delete_button" @click="deleteExplComment(comment.id)">x</button>
                 <img :src="comment.profile_icon_path" alt="" style="width: 50px; height: 50px; border-radius: 50%;">
                 {{ comment.created_at }}
                 {{ comment.username }}
@@ -51,7 +69,7 @@
     <button @click="addComment">Добавить комментарий</button>
     <div v-if="comments.length != 0" class="comments-display">
         <div v-for="comment in comments" :key="comment.id" class="comment">
-            <button v-if="comment.added_by === user.id" @click="deleteSongComment(comment.id)">x</button>
+            <button v-if="comment.added_by === user.id" class="delete_button" @click="deleteSongComment(comment.id)">x</button>
             <img :src="comment.profile_icon_path" alt="" style="width: 50px; height: 50px; border-radius: 50%;">
             {{ comment.created_at }}
             {{ comment.username }}
@@ -177,6 +195,7 @@ export default {
                     console.log(data);
                     const explData = await fetchExplanationComments(selectedExplanation.value.id);
                     for (let i = 0; i < explData.length; i++) {
+                        
                         const date = new Date(explData[i].created_at);
             const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
             explData[i].created_at = formattedDate;
@@ -462,7 +481,6 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
 
         const addComment = async () => {
             try {
-                console.log(newComment.value);
                 if (newComment.value != '') {
                     console.log('fhjdsf');
                     const data = await addUsersComment(song.value.id, user.value.id, newComment.value);
@@ -480,9 +498,9 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
                 await deleteExplanationComment(id);
                 const explData = await fetchExplanationComments(selectedExplanation.value.id);
                     for (let i = 0; i < explData.length; i++) {
-                        const date = new Date(data[i].created_at);
+                        const date = new Date(explData[i].created_at);
             const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-            data[i].created_at = formattedDate;
+            explData[i].created_at = formattedDate;
         }
                     explComments.value = explData;
             } catch (error) {
@@ -582,8 +600,11 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
 </script>
 
 <style>
+@import '../assets/styles/mainstyle.css';
 .lyrics__container {
+    margin-top: 40px;
     position: relative;
+    margin-left: 100px;
 }
 
 .tooltip {
@@ -613,9 +634,9 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
 .explanation-display {
     position: fixed;
     right: 10px;
-    top: 50px;
+    top: 10px;
     width: 30%;
-    padding: 10px;
+    padding: 40px;
     background-color: #f9f9f9;
     border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -651,7 +672,68 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
 }
 
 .explanation_text {
-    max-height: 100px;
+    max-height: 200px;
     overflow-y: scroll;
+}
+
+.close_expl_button {
+    right: 5px;
+    top: 4px;
+    position: absolute;
+    padding: 8px;
+    margin: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #b12828;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
+.close_expl_button:hover {
+    background-color: #cc2a2a;
+}
+.top_container {
+    padding-right: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expl_rating_container {
+    display: flex;
+    flex-direction: column;
+    margin-right: 10px;
+    margin-left: -30px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.explanation_rating_button {
+    background: none;
+    color: #000;
+}
+.explanation_rating_button:hover {
+    background: none;
+    cursor: pointer;
+}
+
+.selected_explanation_rating {
+    background: none;
+    color: #000;
+    width: 20px;
+    text-align: center;
+    box-sizing: border-box;
+}
+.selected_explanation_rating:hover {
+    background: none;
+}
+
+.delete_button {
+    width: 30px;
+}
+
+.add_expl_prev_button {
+    width: 100px;
 }
 </style>

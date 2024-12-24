@@ -27,7 +27,7 @@ input:focus {
   cursor: pointer;
   background: inherit;
   border: 1px solid #2e2d2d;
-  padding: 5px 15px 5px 15px;
+  /* padding: 5px 15px 5px 15px; */
   transition: 0.3s ease-in-out;
   border-radius: 10px;
 }
@@ -154,4 +154,163 @@ input:focus {
   text-align: center;
   width: 30%;
   border: 1px solid #000;
+}
+
+.left_container,
+.right_container,
+.bottom_container {
+  border-radius: 10px;
+  transition: 0.3s ease-out;
+}
+
+.left_container:hover,
+.right_container:hover,
+.bottom_container:hover {
+  scale: 1.05;
+}
+
+.logout_button {
+  padding: 5px 10px;
+  width: 100px;
+}
+
+.logout_button:hover {
+  padding: 5px;
+}
+
+.profile_logout_container {
+  display: flex;
+  align-items: center;
+}
+
+.like_song_icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+}
+
+.top_rated_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.top_rated_container:hover {
+  text-decoration: underline;
+}
+
+.top_rating {
+  margin-left: 10px;
+}
+
+.most_rated {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.main_lyricsview_container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin-left: 30px;
+  margin-right: 10px;
+}
+
+.song_data {
+  border-bottom: 1px solid #000;
+}
+
+.top_rating {
+  padding-left: 5px;
+  border-left: 1px solid #000;
+}
+
+.explanation-display {
+  border: 1px solid #ccc;
+  padding: 40px;
+  margin: 20px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.explanation_text {
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-right: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:nth-of-type(3) {
+  background-color: transparent;
+  color: black;
+  cursor: default;
+}
+
+button:nth-of-type(3):hover {
+  background-color: transparent;
+}
+
+button:nth-of-type(3)::after {
+  content: attr(alt);
+  display: none;
+}
+
+textarea.comment-input {
+  width: 100%;
+  height: 80px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  resize: none;
+}
+
+.comments-display {
+  margin-top: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.comment {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.comment img {
+  margin-right: 10px;
+}
+
+.comment button {
+  margin-right: 10px;
+  background-color: #dc3545;
+}
+
+.comment button:hover {
+  background-color: #c82333;
+}
+
+.login_button {
+  color: #000;
+  width: 150px;
 }

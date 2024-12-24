@@ -66,6 +66,9 @@ export async function uploadExplanation(
       added_by: userID,
     });
     if (error) throw error;
+    else {
+      alert("Объяснение успешно добавлено к обработке");
+    }
   } catch (error) {
     throw new Error(error.message);
   }
@@ -161,6 +164,14 @@ export async function fetchArtists() {
 
 export async function addArtist(artistInfo) {
   try {
+    if (
+      artistInfo.name == "" ||
+      artistInfo.real_name == "" ||
+      artistInfo.description == ""
+    ) {
+      alert("Не все данные были заполнены");
+      return;
+    }
     const { data, error } = await supabase.rpc("add_artist", {
       p_name: artistInfo.name,
       p_real_name: artistInfo.real_name,
@@ -177,6 +188,10 @@ export async function addArtist(artistInfo) {
 
 export async function addSong(songName, lyrics, description, artistId, userId) {
   try {
+    if (songName == "" || lyrics == "" || description == "") {
+      alert("Не все данные были заполнены");
+      return;
+    }
     const { data, error } = await supabase.rpc("add_song", {
       p_name: songName,
       p_lyrics: lyrics.replace(/\n/g, "<br>\n").replace(/\s\s+/g, ""),
