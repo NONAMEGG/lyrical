@@ -112,10 +112,8 @@
       const lyricsText = ref('');
       const description = ref('');
       let selectedFile = 'default';
-      console.log(user.value.icon);
       const handleFileChange = (event) => {
       selectedFile = event.target.files[0]
-      console.log(selectedFile);
     }
     const fetchArtistsForUser = async () => {
       artists.value = [];
@@ -123,16 +121,13 @@
             const data = await fetchArtists();
             
             artists.value = data;
-            console.log(artists);
         } catch (error) {
           console.error('Error fetching songs:', error);  
         }
     }
     const fetchUsersSongs = async () => {
-        console.log('here');
         try {
             const data = await fetchAddedSongs(user.value.id);
-            console.log(data);
             songs.value = data;
         } catch (error) {
           console.error('Error fetching songs:', error);  
@@ -148,7 +143,6 @@
         try {
         const data = await uploadProfileIcon(selectedFile, user.value.id);
         user.value.icon = data; 
-        console.log(user.value.icon);
         localStorage.setItem("userLogin", JSON.stringify(user.value))
       } catch (error) {
           console.error('Ошибка загрузки изображения:', error);  
@@ -173,7 +167,6 @@
 
       const addSongClick = async () => {
   try {
-    console.log(selectedArtist.value);
     if (selectedArtist.value === 'new') {
       const artistId = await addArtist(newArtist.value);
 
@@ -181,7 +174,6 @@
       artists.value.push(newArtist.value);
       selectedArtist.value = artistId;      
     }
-    console.log(lyricsText.value);
     const songId = await addSong(songName.value, lyricsText.value.replace(/\n/g, '<br>\n').replace(/\s\s+/g, ''), description.value, selectedArtist.value, user.value.id);
     if (songId && selectedArtist.value === 'new') {
       alert("Артист и песня успешно добавлены");

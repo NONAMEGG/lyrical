@@ -87,7 +87,6 @@ export async function fetchExplanations(songID) {
 }
 
 export async function uploadProfileIcon(file, userId) {
-  console.log(file);
   const filePath = `${Date.now()}_${file.name}`;
   try {
     const { data, error } = await supabase.storage
@@ -122,11 +121,9 @@ export async function uploadProfileIcon(file, userId) {
 
 export async function fetchAddedSongs(userId) {
   try {
-    console.log(userId);
     const { data, error } = await supabase.rpc("fetch_users_songs", {
       user_id: userId,
     });
-    console.log(data);
     if (error) {
       throw new Error(error.message);
     }
@@ -138,7 +135,6 @@ export async function fetchAddedSongs(userId) {
 
 export async function deleteUsersSong(songId) {
   try {
-    console.log(songId);
     const { error } = await supabase.rpc("delete_user_song", {
       p_song_id: songId,
     });
@@ -235,7 +231,6 @@ export async function fetchMostRatedSongs() {
 export async function fetchResentlyAddedSongs() {
   try {
     const { data, error } = await supabase.rpc("get_songs_added_today");
-    console.log(data);
     if (error) {
       throw new Error(error.message);
     }
@@ -254,7 +249,6 @@ export async function fetchArtist(artistId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -270,7 +264,6 @@ export async function fetchArtistSongs(artistId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -279,7 +272,6 @@ export async function fetchArtistSongs(artistId) {
 
 export async function addUsersComment(songId, userId, comment) {
   try {
-    console.log(songId);
     const { data, error } = await supabase.rpc("add_comment", {
       p_song_id: songId,
       p_user_id: userId,
@@ -289,7 +281,6 @@ export async function addUsersComment(songId, userId, comment) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -298,7 +289,6 @@ export async function addUsersComment(songId, userId, comment) {
 
 export async function fetchSongsComments(songId) {
   try {
-    console.log(songId);
     const { data, error } = await supabase.rpc("fetch_comments", {
       p_song_id: songId,
     });
@@ -306,7 +296,6 @@ export async function fetchSongsComments(songId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -324,7 +313,6 @@ export async function addExplanationComment(userId, comment, explId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -340,7 +328,6 @@ export async function fetchCommentsForExplanation(explId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -349,7 +336,6 @@ export async function fetchCommentsForExplanation(explId) {
 
 export async function likeDislikeSong(songId, userId) {
   try {
-    console.log(songId, userId);
     const { data, error } = await supabase.rpc("add_rating_to_song", {
       p_song_id: songId,
       p_user_id: userId,
@@ -358,7 +344,6 @@ export async function likeDislikeSong(songId, userId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(`my data ${data}`);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -374,7 +359,6 @@ export async function getSongsRatings(songId) {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   } catch (error) {
     throw new Error(error.message);
@@ -457,7 +441,6 @@ export async function fetchExplanationRating(explanationId) {
 
 export async function likeDislikeExplanation(explanationId, userId, newValue) {
   try {
-    console.log(explanationId, userId, newValue);
     const { error } = await supabase.rpc("add_rating_to_explanation", {
       p_explanation_id: explanationId,
       p_new_rating: newValue,
@@ -579,7 +562,6 @@ export async function updateUser(
 
 export async function deleteUser(userId) {
   try {
-    console.log(userId);
     const { error } = await supabase.rpc("delete_user", {
       p_user_id: userId,
     });

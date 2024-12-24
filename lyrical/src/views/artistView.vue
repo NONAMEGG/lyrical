@@ -63,7 +63,6 @@
                     
                     const [data] = await Promise.all([fetchArtist(artistId)]);
                     artist.value = data;
-                    console.log(artist.value);
                 } catch (error) {
                     console.error(`Artist info fetch error ${error}`);
                 }
@@ -101,7 +100,6 @@
                     
                     const [data] = await Promise.all([fetchArtistSongs(artistId)]);
                     artistSongs.value = data;
-                    console.log(artist.value);
                 } catch (error) {
                     console.error(`Artist info fetch error ${error}`);
                 }

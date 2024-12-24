@@ -169,10 +169,7 @@ export default {
         const getArtistId = async () => {
             try {
                 const data = await fetchArtists();
-                console.log(data);
-                console.log(song.value.artist);
                 artistId.value = data.find(artist => artist.name === song.value.artist).id;
-                console.log(artistId.value);
             } catch (error) {
                 console.log(error);
             }
@@ -192,7 +189,6 @@ export default {
             try {
                 if (explComment.value != '') {
                     const data = await addExplanationComment(user.value.id, explComment.value, selectedExplanation.value.id);
-                    console.log(data);
                     const explData = await fetchExplanationComments(selectedExplanation.value.id);
                     for (let i = 0; i < explData.length; i++) {
                         
@@ -230,7 +226,6 @@ export default {
         };
 
         const addExplanation = async () => {
-            console.log(startIndex.value);
             try {
                 await uploadExplanation(song.value.id, explanationText.value, startIndex.value, endIndex.value, user.value.id);
                 explanationText.value = ''; // Clear the input after saving
@@ -296,51 +291,39 @@ export default {
 let selectedTextValue = selection.toString().trim(); // Trim any leading/trailing spaces
 
 if (selectedTextValue.length > 0 && isAuthenticated.value) {
-    console.log(isAuthenticated);
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
-    console.log(song.value.lyrics);
     // Original lyrics with <br> tags
     const lyricsWithBr = song.value.lyrics;
-    console.log(lyricsWithBr);
     // Remove <br> tags and normalize spaces
     let lyricsText = lyricsWithBr.replace(/<br\s*\/?>/gi, ' ');
 
     // Normalize function
-    console.log(lyricsText);
     const normalizeText = (text) => text.replace(/\r\n|\r|\n/g, ' ').replace(/\s+/g, ' ').trim();
-    console.log(selectedTextValue);
     // Apply normalization
     lyricsText = normalizeText(lyricsText);
     selectedTextValue = normalizeText(selectedTextValue);
 
-    console.log("Normalized Lyrics Text:", lyricsText);
-    console.log("Normalized Selected Text:", selectedTextValue);
 
     // Find start index in normalized lyrics
     const startIdx = lyricsText.indexOf(selectedTextValue);
-    console.log(selectedTextValue.length);
     const endIdx = startIdx + selectedTextValue.length - 1;
 
-    console.log("Normalized Start Index:", startIdx, "End Index:", endIdx);
 
     // Create index mapping from original lyrics
     const indexMapping = createIndexMapping(lyricsWithBr);
-    console.log(indexMapping);
     // Check if indices are valid
     if (startIdx >= 0 && endIdx < indexMapping.length) {
         const startIdxWithBr = indexMapping[startIdx];
         const endIdxWithBr = indexMapping[endIdx];
 
-        console.log("Original Start Index with <br>:", startIdxWithBr);
-        console.log("Original End Index with <br>:", endIdxWithBr);
 
         // Detailed character comparison log
-        for (let i = 0; i < selectedTextValue.length; i++) {
-            if (selectedTextValue[i] !== lyricsWithBr[i + startIdxWithBr]) {
-                console.log(i, selectedTextValue[i], lyricsWithBr[i + startIdxWithBr]);
-            }
-        }
+        // for (let i = 0; i < selectedTextValue.length; i++) {
+        //     if (selectedTextValue[i] !== lyricsWithBr[i + startIdxWithBr]) {
+        //         console.log(i, selectedTextValue[i], lyricsWithBr[i + startIdxWithBr]);
+        //     }
+        // }
         const hasOverlap = explanations.value.some(
                     (ex) => !(endIdxWithBr < ex.idx_start || startIdxWithBr > ex.idx_end)
                 );
@@ -393,7 +376,6 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
                         selectedExplanation.value = explanation;
                         const data = await fetchExplanationComments(selectedExplanation.value.id);
                         await getRatingOfSelectedExplanation();
-                        console.log(data);
                         for (let i = 0; i < data.length; i++) {
                             const date = new Date(data[i].created_at);
             const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
@@ -465,15 +447,12 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
             try {
                 
                 const data = await fetchSongsComments(songID);
-                console.log(data);
                 for (let i = 0; i < data.length; i++) {
                     const date = new Date(data[i].created_at);
             const formattedDate = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
             data[i].created_at = formattedDate;
         }
-                console.log(data);
                 comments.value = data;
-                console.log(comments);
             } catch (error) {
                 console.error(error);
             }
@@ -482,7 +461,6 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
         const addComment = async () => {
             try {
                 if (newComment.value != '') {
-                    console.log('fhjdsf');
                     const data = await addUsersComment(song.value.id, user.value.id, newComment.value);
                     newComment.value = '';
                     await fetchComments();
@@ -519,7 +497,6 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
 
         const setRatingOfSelectedExplanation = async (id, rating) => {
             try {
-                console.log('hello');
                 await likeDislikeExplanation(id, user.value.id, rating);
                 await getRatingOfSelectedExplanation();
             } catch (error) {
@@ -531,7 +508,6 @@ if (selectedTextValue.length > 0 && isAuthenticated.value) {
             try {
                 const data = await fetchExplanationRating(selectedExplanation.value.id);
                 selectedExplanationRating.value = data;
-                console.log(selectedExplanationRating.value);
             } catch (error) {
                 console.error(error);
             }
